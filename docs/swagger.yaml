@@ -1,0 +1,312 @@
+basePath: /
+definitions:
+  main.EmptyResponse:
+    type: object
+  main.ErrorResponse:
+    properties:
+      message:
+        example: An error occurred
+        type: string
+    type: object
+  main.InsertSongParams:
+    properties:
+      group_name:
+        example: Джизус
+        type: string
+      song_name:
+        example: Spirit of the world
+        type: string
+    type: object
+  main.ParametersGetSongs:
+    properties:
+      group_name:
+        example: Джизус
+        type: string
+      limit:
+        example: 10
+        type: integer
+      offset:
+        example: 0
+        type: integer
+      song:
+        example: Spirit of the world
+        type: string
+    type: object
+  main.ParametersGetSongsWithFiltersAndPagination:
+    properties:
+      group_name:
+        example: Джизус
+        type: string
+      limit:
+        example: 10
+        type: integer
+      offset:
+        example: 0
+        type: integer
+      release_date:
+        example: "2022-01-01"
+        type: string
+      song:
+        example: Spirit of the world
+        type: string
+    type: object
+  main.Song:
+    properties:
+      group_name:
+        example: Джизус
+        type: string
+      id:
+        example: f7d5a812-12f3-4b92-a7d6-5c9f3a327f6b
+        type: string
+      link:
+        example: https://example.com
+        type: string
+      release_date:
+        type: string
+      song_name:
+        example: Spirit of the world
+        type: string
+      text:
+        example: Song lyrics
+        type: string
+    type: object
+  main.UpdateSongParams:
+    properties:
+      group_name:
+        example: Джизус
+        type: string
+      link:
+        example: https://example.com
+        type: string
+      release_date:
+        example: "2022-11-11"
+        type: string
+      song_name:
+        example: Spirit of the world
+        type: string
+      text:
+        example: Lyrics of the song
+        type: string
+    type: object
+  main.Verse:
+    properties:
+      id:
+        example: f7d5a812-12f3-4b92-a7d6-5c9f3a327f6b
+        type: string
+      limit:
+        example: "10"
+        type: string
+      offset:
+        example: "0"
+        type: string
+    type: object
+host: localhost:8000
+info:
+  contact: {}
+  description: API for managing a song library.
+  title: Song Library API
+  version: "1.0"
+paths:
+  /songs/add:
+    post:
+      consumes:
+      - application/json
+      description: Inserts a new song into the database. Fetches additional song details
+        from an external API.
+      parameters:
+      - description: Request body for inserting a song
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/main.InsertSongParams'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created song details
+          schema:
+            $ref: '#/definitions/main.InsertSongParams'
+        "400":
+          description: Invalid request body or missing fields
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+        "500":
+          description: Failed to insert song or fetch external API data
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+      summary: Insert a new song
+      tags:
+      - Songs
+  /songs/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a song from the database by its ID.
+      parameters:
+      - description: Song ID (UUID)
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful deletion
+          schema:
+            $ref: '#/definitions/main.EmptyResponse'
+        "400":
+          description: Invalid or missing song ID
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+        "500":
+          description: Failed to delete song
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+      summary: Delete a song
+      tags:
+      - Songs
+  /songs/get-song-verses:
+    get:
+      consumes:
+      - application/json
+      description: Get song verses by song ID with pagination
+      parameters:
+      - description: Song ID (UUID)
+        in: query
+        name: id
+        required: true
+        type: string
+      - description: Limit for pagination
+        in: query
+        name: limit
+        type: integer
+      - description: Offset for pagination
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of song verses
+          schema:
+            items:
+              $ref: '#/definitions/main.Verse'
+            type: array
+        "400":
+          description: Invalid parameters
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+        "404":
+          description: Song not found
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+        "500":
+          description: Failed to get song verses
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+      summary: Get song verses with pagination
+      tags:
+      - Songs
+  /songs/get-with-filters-and-pagination:
+    post:
+      consumes:
+      - application/json
+      description: Get song by applying filters and pagination
+      parameters:
+      - description: Request body for getting songs with filters and pagination
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/main.ParametersGetSongsWithFiltersAndPagination'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of filtered songs
+          schema:
+            items:
+              $ref: '#/definitions/main.Song'
+            type: array
+        "400":
+          description: Invalid request body or filters
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+        "500":
+          description: Failed to fetch songs
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+      summary: Get song with filters and pagination
+      tags:
+      - Songs
+  /songs/getAll-with-filters:
+    post:
+      consumes:
+      - application/json
+      description: Get a list of songs with filtering and pagination options
+      parameters:
+      - description: Request body for getting songs with filters
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/main.ParametersGetSongs'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of songs
+          schema:
+            items:
+              $ref: '#/definitions/main.Song'
+            type: array
+        "400":
+          description: Invalid request body or filters
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+        "500":
+          description: Failed to fetch songs
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+      summary: Get all songs with filters
+      tags:
+      - Songs
+  /songs/update:
+    put:
+      consumes:
+      - application/json
+      description: Updates the details of an existing song in the database.
+      parameters:
+      - description: Song ID (UUID)
+        in: query
+        name: id
+        required: true
+        type: string
+      - description: Request body for updating a song
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/main.UpdateSongParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated song details
+          schema:
+            $ref: '#/definitions/main.UpdateSongParams'
+        "400":
+          description: Invalid request body or song ID
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+        "500":
+          description: Failed to update song
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+      summary: Update an existing song
+      tags:
+      - Songs
+swagger: "2.0"
